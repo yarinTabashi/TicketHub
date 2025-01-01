@@ -1,0 +1,12 @@
+# It means the Eureka server doesn't need to communicate with another Eureka instance
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: false # there is no one more Eureka instance, so it shouldn't register himself in another Eureka server
+    fetchRegistry: false # there aren't more Eureka instances, so it shouldn't communicate with another Eureka instances, in order to get a list of the registered services.
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/ # The url endpoint where Eureka clients will can to access to the Eurika server (in order to register themselves or to fetch list).
+
+server:
+  port: 8761

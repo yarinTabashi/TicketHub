@@ -1,0 +1,15 @@
+--CREATE TABLE IF NOT EXISTS screening (
+--    id SERIAL PRIMARY KEY,
+--    movie_id INTEGER,
+--    showtime TIMESTAMP,
+--    available_seats INTEGER
+--);
+--
+--CREATE SEQUENCE IF NOT EXISTS screening_seq START WITH 1 INCREMENT BY 1;
+--
+--INSERT INTO screening (movie_id, showtime, available_seats) VALUES
+--(1, '2024-12-29 19:30:00', 100),
+--(2, '2024-12-29 21:00:00', 150),
+--(3, '2024-12-30 15:00:00', 80),
+--(4, '2024-12-30 18:00:00', 120),
+--(5, '2024-12-30 20:30:00', 50);

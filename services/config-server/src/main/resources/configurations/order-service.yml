@@ -1,0 +1,17 @@
+server:
+  port: 8020
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/order
+    username: postuser
+    password: postpass
+  jpa:
+    hibernate:
+      ddl-auto: create
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+application:
+  config:
+    customer-url: http://localhost:8222/api/v1/customer
+    screening-url: http://localhost:8222/api/v1/screening

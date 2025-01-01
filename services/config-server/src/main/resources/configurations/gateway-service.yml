@@ -1,0 +1,37 @@
+server:
+  port: 8222
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true # It means it will search services by there names (instead of URIs)
+      routes:
+        - id: customer-service
+          uri: lb:http://CUSTOMER-SERVICE
+          predicates:
+            - Path=/api/v1/customers/**
+        - id: order-service
+          uri: lb:http://ORDER-SERVICE
+          predicates:
+            - Path=/api/v1/orders/**
+        - id: order-lines-service
+          uri: lb:http://ORDER-SERVICE
+          predicates:
+            - Path=/api/v1/order-lines/**
+        - id: movie-service
+          uri: lb:http://MOVIE-SERVICE
+          predicates:
+            - Path=/api/v1/movies/**
+        - id: payment-service
+          uri: lb:http://PAYMENT-SERVICE
+          predicates:
+            - Path=/api/v1/payments/**
+        - id: screening-service
+          uri: lb:http://SCREENING-SERVICE
+          predicates:
+            - Path=/api/v1/screening/**
+        - id: ticket-service
+          uri: lb:http://TICKET-SERVICE
+          predicates:
+            - Path=/api/v1/ticket/**
