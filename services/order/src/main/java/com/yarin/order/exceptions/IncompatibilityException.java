@@ -6,5 +6,5 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class IncompatibilityException extends RuntimeException{
-    private final String msg;
+  private final String msg;
 }

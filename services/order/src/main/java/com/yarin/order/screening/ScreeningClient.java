@@ -1,18 +1,26 @@
 package com.yarin.order.screening;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.math.BigDecimal;
 
 @FeignClient(
         name = "screening-url",
         url = "${application.config.screening-url}"
 )
 public interface ScreeningClient {
-    // Get the remaining tickets for a screening
-    @GetMapping("/remaining-tickets/{screening-id}")
-    int getRemainingTickets(@PathVariable("screening-id") Integer screeningId);
+    // This method checks if the screening and the specified seat exist and are available.
+    // If both conditions are met, it marks the seat as unavailable and returns the price for the ticket.
+    @GetMapping("/exists/{screening-id}/{seat-number}")
+    ResponseEntity<BigDecimal> validateAndReserveSeat(@PathVariable("screening-id") Integer screeningId,
+                                            @PathVariable("seat-number") String seatNumber);
 
-    @GetMapping("/exists/{screening-id}")
-    boolean isExist(@PathVariable("screening-id") String customerId);
+    // This method cancels the seat reservation
+    @DeleteMapping("/cancel/{screening-id}/{seat-number}")
+    void cancelSeatReservation(@PathVariable("screening-id") Integer screeningId,
+                               @PathVariable("seat-number") String seatNumber);
 }
