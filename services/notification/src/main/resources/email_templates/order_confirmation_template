@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            margin: 0 auto;
+            border-radius: 10px;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .total-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Order Confirmation</h1>
+
+        <p>Hello <span th:text="${customerName}"></span>,</p>
+        <p>Thank you for your order! Below are the details of your movie ticket purchase:</p>
+
+        <h2>Order Details</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Screening ID</th>
+                    <th>Seat Number</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Loop through the list of tickets -->
+                <tr th:each="ticket : ${tickets}">
+                    <td th:text="${ticket.screeningId}"></td>
+                    <td th:text="${ticket.seatNumber}"></td>
+                    <td th:text="${ticket.price}"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total-amount">
+            <p>Total Amount: <span th:text="${totalAmount}"></span></p>
+        </div>
+
+        <p>Order Reference: <span th:text="${orderReference}"></span></p>
+
+        <div class="footer">
+            <p>If you have any questions, please contact our support team at <a href="mailto:support@aliboucoding.com">support@aliboucoding.com</a>.</p>
+            <p>&copy; 2025 Alibou E-Commerce</p>
+        </div>
+    </div>
+</body>
+</html>

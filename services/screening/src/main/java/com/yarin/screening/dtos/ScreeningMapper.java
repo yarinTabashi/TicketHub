@@ -21,6 +21,7 @@ public class ScreeningMapper {
                 .showtime(request.showtime())
                 .seatsAvailabilityMap(seatsAvailabilityMap)
                 .availableSeats(availableSeats)
+                .ticketPrice(request.ticketPrice())
                 .build();
     }
 
@@ -46,7 +47,8 @@ public class ScreeningMapper {
                 screening.getId(),
                 screening.getMovieId(),
                 screening.getShowtime(),
-                screening.getAvailableSeats()
+                screening.getAvailableSeats(),
+                screening.getTicketPrice()
         );
     }
 }

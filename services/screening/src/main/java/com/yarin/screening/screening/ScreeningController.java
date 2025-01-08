@@ -5,13 +5,14 @@ import com.yarin.screening.dtos.ScreeningResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/screening")
 public class ScreeningController {
-
     private final ScreeningService screeningService;
 
     public ScreeningController(ScreeningService screeningService) {
@@ -54,9 +55,24 @@ public class ScreeningController {
         return ResponseEntity.ok(screenings);
     }
 
-    @GetMapping("/remaining-tickets/{screening-id}")
-    public ResponseEntity<Integer> getRemainingTickets(@PathVariable("screening-id") Integer screeningId) {
-        int remainingTickets = screeningService.getRemainingTickets(screeningId);
-        return ResponseEntity.ok(remainingTickets);
+    @GetMapping("/validateAndReserveSeat/{screening-id}/{seat-number}")
+    public ResponseEntity<BigDecimal> validateAndReserveSeat(
+            @PathVariable("screening-id") Integer screeningId,
+            @PathVariable("seat-number") String seatNumber) {
+
+        ResponseEntity<BigDecimal> response = screeningService.validateAndReserveSeat(screeningId, seatNumber);
+
+        // Check the response from the ScreeningClient
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return ResponseEntity.ok(response.getBody()); // Seat reserved, return the price
+        } else {
+            return ResponseEntity.status(response.getStatusCode()).body(null); // If validation fails, return the error
+        }
+    }
+
+    @DeleteMapping("/cancel/{screening-id}/{seat-number}")
+    ResponseEntity<Void> cancelSeatReservation(@PathVariable("screening-id") Integer screeningId,
+                                               @PathVariable("seat-number") String seatNumber){
+        return screeningService.cancelSeatReservation(screeningId, seatNumber);
     }
 }
