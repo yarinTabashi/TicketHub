@@ -1,3 +1,4 @@
+# application.yml is the base configuration, containing common settings shared across all microservices.
 eureka:
   instance:
     hostname: localhost

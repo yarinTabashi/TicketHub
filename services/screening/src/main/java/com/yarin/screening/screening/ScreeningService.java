@@ -9,11 +9,12 @@ import com.yarin.screening.movie.MovieClient;
 import jakarta.persistence.OptimisticLockException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,19 +82,20 @@ public class ScreeningService {
      *         - {@code 409 Conflict} if the seat is already reserved (409 indicates a conflict - resource is unavailable).
      *         - {@code 200 OK} with the price of the ticket if the seat is successfully reserved.
      */
-    public ResponseEntity<BigDecimal> validateAndReserveSeat(Integer screeningId, String seatNumber) {
+    @Async
+    public CompletableFuture<ResponseEntity<BigDecimal>> validateAndReserveSeat(Integer screeningId, String seatNumber) {
         // Step 1: Fetch the screening from the repository
         Optional<Screening> optionalScreening = screeningRepository.findById(screeningId);
 
         if (optionalScreening.isEmpty()) {
-            return ResponseEntity.notFound().build(); // Screening not found
+            return CompletableFuture.completedFuture(ResponseEntity.notFound().build()); // Screening not found
         }
 
         Screening screening = optionalScreening.get();
 
         // Step 2: Pre-check: If no seats are available, skip further reservation logic.
-        if (screening.getAvailableSeats() == 0){
-            return ResponseEntity.status(409).body(null); // Seat not available
+        if (screening.getAvailableSeats() == 0) {
+            return CompletableFuture.completedFuture(ResponseEntity.status(409).body(null)); // Seat not available
         }
 
         // Step 3: Parse the seatNumber
@@ -104,7 +106,7 @@ public class ScreeningService {
 
         // Step 5: Check if the seat is valid and available
         if (!isSeatAvailable(seatsAvailability, seatPosition)) {
-            return ResponseEntity.status(409).body(null); // Seat already reserved or invalid seat number
+            return CompletableFuture.completedFuture(ResponseEntity.status(409).body(null)); // Seat already reserved or invalid seat number
         }
 
         // Step 6: Reserve the seat
@@ -116,11 +118,11 @@ public class ScreeningService {
             screeningRepository.save(screening);
         } catch (OptimisticLockException e) {
             // If a conflict occurs due to optimistic locking (if another user modified the screening)
-            return ResponseEntity.status(409).body(null);
+            return CompletableFuture.completedFuture(ResponseEntity.status(409).body(null));
         }
 
         BigDecimal ticketPrice = screening.getTicketPrice();
-        return ResponseEntity.ok(ticketPrice); // Successfully reserved
+        return CompletableFuture.completedFuture(ResponseEntity.ok(ticketPrice)); // Successfully reserved
     }
 
     /**

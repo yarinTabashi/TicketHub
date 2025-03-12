@@ -7,8 +7,6 @@ import com.yarin.customer.exceptions.CustomerNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.apache.commons.lang.StringUtils;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,29 +22,22 @@ public class CustomerService {
     public void updateCustomer(CustomerRequest request) {
         var customer = this.repository.findById(request.id())
                 .orElseThrow(() -> new CustomerNotFoundException(
-                        String.format("Cannot update customer. The customer with the ID: %d isn't found.", request.id())
+                        String.format("Cannot update customer. The customer with the ID: %s isn't found.", request.id())
                 ));
-        mergeCustomer(customer, request);
+        updateCustomerData(customer, request);
         this.repository.save(customer);
     }
 
-    private void mergeCustomer(Customer customer, CustomerRequest request) {
+    private void updateCustomerData(Customer customer, CustomerRequest request) {
         if (StringUtils.isNotBlank(request.firstname())) {
             customer.setFirstname(request.firstname());
         }
         if (StringUtils.isNotBlank(request.email())) {
             customer.setEmail(request.email());
         }
-        if (request.address() != null) {
-            customer.setAddress(request.address());
+        if (request.city() != null) {
+            customer.setCity(request.city());
         }
-    }
-
-    public List<CustomerResponse> findAllCustomers() {
-        return  this.repository.findAll()
-                .stream()
-                .map(this.mapper::fromCustomer)
-                .collect(Collectors.toList());
     }
 
     public CustomerResponse findById(String id) {

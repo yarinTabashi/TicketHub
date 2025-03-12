@@ -11,11 +11,14 @@ import com.yarin.common_dtos.screening.ScreeningClient;
 import com.yarin.common_dtos.ticket.TicketRequest;
 import com.yarin.common_dtos.ticket.TicketService;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +35,8 @@ public class OrderService {
     private final PaymentClient paymentClient;
     private final NotificationClient notificationClient;
     private List<Ticket> tickets;
+    private ApplicationEventPublisher eventPublisher;
+
 
     public int createOrder(OrderRequest orderRequest) {
         try {
@@ -47,8 +52,7 @@ public class OrderService {
             // 4. Make call to the payment service
             processPayment(orderRequest.customerId(), order);
 
-            // 5. Make call to the notification service
-            sendNotification(orderRequest.customerId(), order);
+            // 5. TODO: Create event of OrderSucceeded for notification service to consume it
 
             // 6. Update the order status to SUCCESS
             return completeOrder(order);
@@ -79,19 +83,29 @@ public class OrderService {
         }
     }
 
-    // Verify seats and creates tickets
+    // Verify seats and creates tickets asynchronously
     private void validateSeatsAndGenerateTickets(OrderRequest orderRequest, List<SeatRequest> seats) {
-        BigDecimal price = BigDecimal.ZERO;
-        List<SeatRequest> requiredSeats = orderRequest.seats();
+        // List to hold futures of the asynchronous seat validations
+        List<CompletableFuture<Void>> seatValidationFutures = seats.stream()
+                .map(seatRequest -> CompletableFuture.runAsync(() -> {
+                    try {
+                        // Validate and reserve each seat asynchronously
+                        ResponseEntity<BigDecimal> seatValidationResponse = validateAndReserveSeat(seatRequest);
 
-        for (SeatRequest seatRequest : requiredSeats) {
-            ResponseEntity<BigDecimal> seatValidationResponse = validateAndReserveSeat(seatRequest);
+                        // If seat is valid, create a ticket
+                        BigDecimal price = seatValidationResponse.getBody();
+                        if (price != null) {
+                            // Add ticket creation logic
+                            tickets.add(ticketService.createTicket(new TicketRequest(seatRequest.screeningId(), seatRequest.seatNumber(), orderRequest.customerId(), price)));
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error processing seat request for seat: " + seatRequest.seatNumber(), e);
+                    }
+                }))
+                .collect(Collectors.toList());
 
-            price = seatValidationResponse.getBody();
-
-            // Create ticket with the price and add it to the tickets list
-            tickets.add(ticketService.createTicket(new TicketRequest(seatRequest.screeningId(), seatRequest.seatNumber(), orderRequest.customerId(), price)));
-        }
+        // Wait for all asynchronous seat validation tasks to complete
+        CompletableFuture.allOf(seatValidationFutures.toArray(new CompletableFuture[0])).join();
     }
 
     // Validate and reserve a seat
