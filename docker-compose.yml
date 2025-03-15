@@ -58,22 +58,35 @@ services:
       - zookeeper
     ports:
       - "9092:9092"
+      - "9997:9997"
     environment:
       KAFKA_BROKER_ID: 1  # Unique ID for the broker
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181  # ZooKeeper connection
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092  # Simplified to one listener for single broker
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092  # Advertised to host
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT  # Security protocol
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092 # Advertised to host
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT  # Security protocol
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT  # Inter-broker listener (single broker case)
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1  # Single broker, so replication factor is 1
       KAFKA_NUM_PARTITIONS: 8  # Default number of partitions for new topics
       KAFKA_LOG_DIRS: /var/lib/kafka/data  # Log directory
-      KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE: "false"  # Disable Confluent metrics
+      KAFKA_JMX_PORT: 9997
     #    environment:
 #      KAFKA_BROKER_ID: 1
 #      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
 #      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
 ##      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "9000:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: dev-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_METRICS_PORT: 9997
+      DYNAMIC_CONFIG_ENABLED: true
+    depends_on:
+      - kafka
 
 volumes:
   mongo:
