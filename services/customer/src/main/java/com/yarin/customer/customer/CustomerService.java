@@ -4,18 +4,49 @@ import com.yarin.customer.dtos.CustomerMapper;
 import com.yarin.customer.dtos.CustomerRequest;
 import com.yarin.customer.dtos.CustomerResponse;
 import com.yarin.customer.exceptions.CustomerNotFoundException;
+import com.yarin.customer.kafka.UserRegisteredEvent;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.KafkaException;
+import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.apache.commons.lang.StringUtils;
 
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
+    private final KafkaTemplate<String, UserRegisteredEvent> kafkaTemplate;
     private final CustomerRepository repository;
     private final CustomerMapper mapper;
 
+
+    private final static int PARTITION_COUNT = 1;
+    private final static short REPLICATION_FACTOR = 1;
+    private final static String TOPIC = "customer-events";
+
+
+    public void configureTopic(KafkaAdmin kafkaAdmin){
+        kafkaAdmin.createOrModifyTopics(new NewTopic(TOPIC, PARTITION_COUNT, REPLICATION_FACTOR));
+    }
+
     public String createCustomer(CustomerRequest request) {
-        var customer = this.repository.save(mapper.toCustomer(request));
+        Customer customer = this.repository.save(mapper.toCustomer(request));
+
+        UserRegisteredEvent event = new UserRegisteredEvent(
+                customer.getId(),
+                customer.getEmail(),
+                String.format("%s %s", customer.getFirstname(), customer.getLastname())
+        );
+        try{
+            kafkaTemplate.send(new ProducerRecord<>("customer-events", event));
+        }
+        catch (KafkaException e){
+            System.err.println("Failed to send message to Kafka: " + e.getMessage());
+        }
+//        kafkaTemplate.send("customer-events", event);
         return customer.getId();
     }
 

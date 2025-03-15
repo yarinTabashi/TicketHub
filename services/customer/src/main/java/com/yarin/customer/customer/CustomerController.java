@@ -15,6 +15,7 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<String> createCustomer(@RequestBody @Valid CustomerRequest request) {
+        // TODO: create UserRegistered event
         return ResponseEntity.ok(this.service.createCustomer(request));
     }
 

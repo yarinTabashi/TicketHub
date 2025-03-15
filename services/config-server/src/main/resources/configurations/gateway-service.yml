@@ -15,27 +15,27 @@ spring:
           uri: lb:http://ORDER-SERVICE
           predicates:
             - Path=/api/v1/orders/**
-        - id: order-lines-service
-          uri: lb:http://ORDER-SERVICE
-          predicates:
-            - Path=/api/v1/order-lines/**
         - id: movie-service
           uri: lb:http://MOVIE-SERVICE
           predicates:
             - Path=/api/v1/movies/**
-        - id: payment-service
-          uri: lb:http://PAYMENT-SERVICE
-          predicates:
-            - Path=/api/v1/payments/**
+#        - id: payment-service
+#          uri: lb:http://PAYMENT-SERVICE
+#          predicates:
+#            - Path=/api/v1/payments/**
         - id: screening-service
           uri: lb:http://SCREENING-SERVICE
           predicates:
             - Path=/api/v1/screening/**
-        - id: ticket-service
-          uri: lb:http://TICKET-SERVICE
-          predicates:
-            - Path=/api/v1/ticket/**
+#        - id: ticket-service
+#          uri: lb:http://TICKET-SERVICE
+#          predicates:
+#            - Path=/api/v1/ticket/**
         - id: auth-service
           uri: lb:http://AUTH-SERVICE
           predicates:
             - Path=/api/v1/auth/**
+        - id: notification-service
+          uri: lb:http://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/v1/notification/**

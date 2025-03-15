@@ -1,5 +1,4 @@
 package com.yarin.movie.movie;
-
 import com.yarin.movie.dtos.MovieMapper;
 import com.yarin.movie.dtos.MovieRequest;
 import com.yarin.movie.dtos.MovieResponse;
