@@ -22,16 +22,6 @@ public class CustomerService {
     private final CustomerRepository repository;
     private final CustomerMapper mapper;
 
-
-    private final static int PARTITION_COUNT = 1;
-    private final static short REPLICATION_FACTOR = 1;
-    private final static String TOPIC = "customer-events";
-
-
-    public void configureTopic(KafkaAdmin kafkaAdmin){
-        kafkaAdmin.createOrModifyTopics(new NewTopic(TOPIC, PARTITION_COUNT, REPLICATION_FACTOR));
-    }
-
     public String createCustomer(CustomerRequest request) {
         Customer customer = this.repository.save(mapper.toCustomer(request));
 
@@ -46,7 +36,6 @@ public class CustomerService {
         catch (KafkaException e){
             System.err.println("Failed to send message to Kafka: " + e.getMessage());
         }
-//        kafkaTemplate.send("customer-events", event);
         return customer.getId();
     }
 
