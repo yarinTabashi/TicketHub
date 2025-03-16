@@ -1,9 +1,8 @@
 package com.yarin.kafka;
 
-import com.yarin.common_dtos.UserRegisteredEvent;
+import com.yarin.common_dtos.CustomerEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -13,25 +12,42 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @EnableKafka
 public class NotificationsConsumer {
-    //private final EmailService emailService;
+    // private EmailService emailService;
 
     @KafkaListener(topics = "customer-events", groupId = "notification-group")
-    public void handleUserRegisteredEvent(ConsumerRecord<String, UserRegisteredEvent> record){
-        UserRegisteredEvent event = null;
-        try {
-            event = record.value();
-            System.out.println("Received message: " + record.value());
-
-            log.info("Received UserRegisteredEvent: {}", event);
-
-            sendWelcomeEmail(event.email(), event.fullName());
-        } catch (Exception e) {
-            System.err.println("Error processing message: " + e.getMessage());
+    public void handleCustomerEvents(CustomerEvent event){
+        switch (event.type()){
+            case REGISTERED:
+                handleCustomerRegisteredEvent(event);
+                break;
+            case UPDATED:
+                handleCustomerUpdatedEvent(event);
+                break;
+            case DELETED:
+                handleCustomerDeletedEvent(event);
+                break;
+            default:
+                log.error("Cannot determine the event type: {}", event.type());
         }
     }
 
-    public void sendWelcomeEmail(String email, String fullName){
-        log.info("Sending welcome email to: {} ({})", fullName, email);
+    public void handleCustomerRegisteredEvent(CustomerEvent event){
+        String emailContent = String.format("Hello %s, Welcome to our platform!", event.fullName());
+        sendEmail(event.email(), "Customer Registered", emailContent);
+    }
+
+    public void handleCustomerUpdatedEvent(CustomerEvent event){
+        String emailContent = String.format("Hello %s, Your details have been successfully updated.", event.fullName());
+        sendEmail(event.email(), "Customer Details Updated", emailContent);
+    }
+
+    public void handleCustomerDeletedEvent(CustomerEvent event){
+        String emailContent = String.format("Hello %s, We're sorry to see you go. Your account has been deleted.", event.fullName());
+        sendEmail(event.email(), "Customer Account Deleted", emailContent);
+    }
+
+    public void sendEmail(String email, String subject, String content){
+        log.info("To: {} \n Subject: {} \n Content: {} ", email, subject, content);
         // TODO: send the email using the email service
     }
 }
