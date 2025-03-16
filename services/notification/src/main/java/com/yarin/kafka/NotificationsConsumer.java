@@ -15,16 +15,16 @@ import org.springframework.stereotype.Service;
 public class NotificationsConsumer {
     //private final EmailService emailService;
 
-    @KafkaListener(topics = "customerr-events", groupId = "notification-group")
+    @KafkaListener(topics = "customer-events", groupId = "notification-group")
     public void handleUserRegisteredEvent(ConsumerRecord<String, UserRegisteredEvent> record){
         UserRegisteredEvent event = null;
         try {
             event = record.value();
             System.out.println("Received message: " + record.value());
-            // Process the message here
+
             log.info("Received UserRegisteredEvent: {}", event);
 
-            sendWelcomeEmail(event.getEmail(), event.getFullName());
+            sendWelcomeEmail(event.email(), event.fullName());
         } catch (Exception e) {
             System.err.println("Error processing message: " + e.getMessage());
         }
