@@ -2,6 +2,7 @@ package com.yarin.screening.screening;
 
 import com.yarin.screening.dtos.ScreeningRequest;
 import com.yarin.screening.dtos.ScreeningResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,12 +13,9 @@ import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/v1/screening")
+@RequiredArgsConstructor
 public class ScreeningController {
     private final ScreeningService screeningService;
-
-    public ScreeningController(ScreeningService screeningService) {
-        this.screeningService = screeningService;
-    }
 
     // Create a new screening
     @PostMapping
@@ -48,7 +46,7 @@ public class ScreeningController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // Endpoint to get screenings by movieId
+    // Get all the screening by movieId
     @GetMapping("/movie/{movieId}")
     public ResponseEntity<List<ScreeningResponse>> getScreeningsByMovieId(@PathVariable Integer movieId) {
         List<ScreeningResponse> screenings = screeningService.getScreeningsByMovieId(movieId);
