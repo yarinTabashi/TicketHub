@@ -53,28 +53,28 @@ public class ScreeningController {
         return ResponseEntity.ok(screenings);
     }
 
-    @GetMapping("/validateAndReserveSeat/{screening-id}/{seat-number}")
-    public CompletableFuture<ResponseEntity<BigDecimal>> validateAndReserveSeat(
-            @PathVariable("screening-id") Integer screeningId,
-            @PathVariable("seat-number") String seatNumber) {
-
-        // Call the service asynchronously
-        return screeningService.validateAndReserveSeat(screeningId, seatNumber)
-                .thenApply(response -> {
-                    // Handle the response from the async service method
-                    if (response.getStatusCode().is2xxSuccessful()) {
-                        // If validation succeeds, return OK response with price
-                        return ResponseEntity.ok(response.getBody());
-                    } else {
-                        // If validation fails, returns the error code
-                        return ResponseEntity.status(response.getStatusCode()).body(null);
-                    }
-                });
-    }
-
-    @DeleteMapping("/cancel/{screening-id}/{seat-number}")
-    ResponseEntity<Void> cancelSeatReservation(@PathVariable("screening-id") Integer screeningId,
-                                               @PathVariable("seat-number") String seatNumber){
-        return screeningService.cancelSeatReservation(screeningId, seatNumber);
-    }
+//    @GetMapping("/validateAndReserveSeat/{screening-id}/{seat-number}")
+//    public CompletableFuture<ResponseEntity<BigDecimal>> validateAndReserveSeat(
+//            @PathVariable("screening-id") Integer screeningId,
+//            @PathVariable("seat-number") String seatNumber) {
+//
+//        // Call the service asynchronously
+//        return screeningService.validateAndReserveSeat(screeningId, seatNumber)
+//                .thenApply(response -> {
+//                    // Handle the response from the async service method
+//                    if (response.getStatusCode().is2xxSuccessful()) {
+//                        // If validation succeeds, return OK response with price
+//                        return ResponseEntity.ok(response.getBody());
+//                    } else {
+//                        // If validation fails, returns the error code
+//                        return ResponseEntity.status(response.getStatusCode()).body(null);
+//                    }
+//                });
+//    }
+//
+//    @DeleteMapping("/cancel/{screening-id}/{seat-number}")
+//    ResponseEntity<Void> cancelSeatReservation(@PathVariable("screening-id") Integer screeningId,
+//                                               @PathVariable("seat-number") String seatNumber){
+//        return screeningService.cancelSeatReservation(screeningId, seatNumber);
+//    }
 }

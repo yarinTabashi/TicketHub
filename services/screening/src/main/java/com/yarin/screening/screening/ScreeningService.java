@@ -53,19 +53,10 @@ public class ScreeningService {
         screeningRepository.deleteById(id);
     }
 
-    // Get screenings by movieId
     public List<ScreeningResponse> getScreeningsByMovieId(Integer movieId) {
-        return screeningRepository.findByMovieId(movieId)
-                .stream()
-                .map(this.screeningMapper::fromScreening)  // Map each Screening to a ScreeningResponse
-                .collect(Collectors.toList());
-    }
-
-    public int getRemainingTickets(Integer screeningId) {
-        Screening screening = screeningRepository.findById(screeningId)
-                .orElseThrow(() -> new RuntimeException("Screening not found"));
-
-        return screening.getAvailableSeats();
+        // Fetch screenings from the database
+        List<ScreeningResponse> screenings = screeningRepository.findByMovieId(movieId);
+        return this.screeningRepository.findByMovieId(movieId);
     }
 
     /**

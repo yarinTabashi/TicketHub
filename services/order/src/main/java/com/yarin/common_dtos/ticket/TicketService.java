@@ -1,5 +1,6 @@
 package com.yarin.common_dtos.ticket;
 import com.yarin.common_dtos.common_dtos.Ticket;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -42,6 +43,7 @@ public class TicketService {
     }
 
     // Get all tickets for a specific screening
+    @Transactional
     public List<TicketResponse> getTicketsByScreening(Integer screeningId) {
         List<Ticket> tickets = ticketRepository.findByScreeningId(screeningId);
         return tickets.stream()

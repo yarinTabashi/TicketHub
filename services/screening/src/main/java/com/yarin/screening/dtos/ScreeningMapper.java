@@ -11,7 +11,7 @@ public class ScreeningMapper {
         }
 
         // Initialize the seatsAvailabilityMap as a 2D array
-        boolean[][] seatsAvailabilityMap = createSeatsAvailabilityMap(request.numOfRows(), request.seatsPerRow());
+        String seatsAvailabilityMap = createSeatsAvailabilityMap(request.numOfRows(), request.seatsPerRow());
 
         // Calculate the total number of available seats
         Integer availableSeats = request.numOfRows() * request.seatsPerRow();
@@ -25,18 +25,21 @@ public class ScreeningMapper {
                 .build();
     }
 
-    // Helper method to create and initialize the seatsAvailabilityMap
-    private boolean[][] createSeatsAvailabilityMap(int rowsCount, int seatsPerRow) {
-        boolean[][] seats = new boolean[rowsCount][seatsPerRow];
+    // Initialize the seatsAvailabilityMap (at the beginning, all the cells are available)
+    private String createSeatsAvailabilityMap(int rowsCount, int seatsPerRow) {
+        StringBuilder availabilityMap = new StringBuilder();
 
-        // Initialize all seats as available
-        for (int row = 0; row < rowsCount; row++) {
-            for (int col = 0; col < seatsPerRow; col++) {
-                seats[row][col] = false; // False means available
+        // Loop through each row and initialize all seats as available (represented by 'T')
+        for (int i = 0; i < rowsCount; i++) {
+            for (int j = 0; j < seatsPerRow; j++) {
+                availabilityMap.append("0");
+            }
+            if (i < rowsCount - 1) {
+                availabilityMap.append("\n");
             }
         }
 
-        return seats;
+        return availabilityMap.toString();
     }
 
     public ScreeningResponse fromScreening(Screening screening) {

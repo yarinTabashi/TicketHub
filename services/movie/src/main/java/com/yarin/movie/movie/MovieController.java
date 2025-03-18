@@ -24,4 +24,10 @@ public class MovieController {
     public ResponseEntity<List<MovieResponse>> findAll() {
         return ResponseEntity.ok(this.movieService.findAll());
     }
+
+    @GetMapping("/{movieId}/exists")
+    public ResponseEntity<Boolean> isMovieExist(@PathVariable("movieId") Integer movieId) {
+        boolean exists = movieService.isMovieExist(movieId);
+        return ResponseEntity.ok(exists);
+    }
 }
