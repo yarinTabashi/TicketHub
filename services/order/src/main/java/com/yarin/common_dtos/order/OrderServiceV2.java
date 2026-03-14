@@ -49,7 +49,7 @@ public class OrderServiceV2 implements OrderService {
         CompletableFuture<BigDecimal> orderAmount = getOrderAmount(screeningId, requiredSeats);
 
         // Step 3: Create and save the order with PENDING status
-        Order order = createInitialOrder(customerId, orderAmount.join());
+        Order order = createInitialOrder(customerId, orderAmount.join()); // TODO: Reconsider structure of async calls to optimize time
 
         // Step 4: Revalidate seat availability and mark them as "reserved" (Optimistic Locking)
         Boolean finalSeatsAvailability = screeningClient.reserveSeats(screeningId, requiredSeats).getBody();
