@@ -3,3 +3,8 @@ spring:
     import: optional:configserver:http://localhost:8888
   application:
     name: gateway-service
+
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

@@ -27,6 +27,11 @@ public class OrderServiceV2 implements OrderService {
     private Logger log;
     private final KafkaTemplate<String, OrderCreatedEvent> kafkaTemplate;
 
+    @Override
+    public int createOrder(OrderRequest orderRequest) {
+        return 0; //TODO
+    }
+
     public int createOrder(String customerId, Integer screeningId, List<String> requiredSeats) {
         // Steps 1 & 2: Make 2 async calls in parallel (validate user exist and seats availability)
         CompletableFuture<Boolean> isCustomerExist = verifyCustomer(customerId);
@@ -152,8 +157,5 @@ public class OrderServiceV2 implements OrderService {
         return order.getId();
     }
 
-    @Override
-    public int createOrder(OrderRequest orderRequest) {
-        return 0; //TODO
-    }
+
 }
