@@ -3,3 +3,8 @@ spring:
     import: optional:configserver:http://localhost:8888
   application:
     name: order-service
+
+
+order:
+  service:
+    with-publish: false

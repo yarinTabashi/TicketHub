@@ -1,4 +1,6 @@
-package com.yarin.common_dtos.order;
+package com.yarin.common_dtos.order.api;
+
+import com.yarin.common_dtos.order.SeatRequest;
 
 import java.util.List;
 
