@@ -9,9 +9,11 @@ import com.yarin.common_dtos.notification.NotificationClient;
 import com.yarin.common_dtos.order.api.OrderRequest;
 import com.yarin.common_dtos.payment.PaymentClient;
 import com.yarin.common_dtos.screening.ScreeningClient;
+import com.yarin.common_dtos.screening.ScreeningService;
 import com.yarin.common_dtos.ticket.TicketRequest;
 import com.yarin.common_dtos.ticket.TicketService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
@@ -27,14 +29,14 @@ import org.slf4j.LoggerFactory;
 @AllArgsConstructor
 @Service
 @ConditionalOnProperty(name = "order.service.with-publish", havingValue = "false")
+@Slf4j
 public class OrderServiceV1 implements OrderService {
-    private static final Logger log = LoggerFactory.getLogger(OrderServiceV1.class); // Initialize the logger
 
     private final OrderRepository orderRepository;
     private final TicketService ticketService;
 
     private final CustomerClient customerClient;
-    private final ScreeningClient screeningClient;
+    private final ScreeningService screeningService;
     private final PaymentClient paymentClient;
     private final NotificationClient notificationClient;
     private List<Ticket> tickets;
@@ -93,11 +95,9 @@ public class OrderServiceV1 implements OrderService {
         List<CompletableFuture<Void>> seatValidationFutures = seats.stream()
                 .map(seatRequest -> CompletableFuture.runAsync(() -> {
                     try {
-                        // Validate and reserve each seat asynchronously
-                        ResponseEntity<BigDecimal> seatValidationResponse = validateAndReserveSeat(seatRequest);
 
-                        // If seat is valid, create a ticket
-                        BigDecimal price = seatValidationResponse.getBody();
+                        // Validate and reserve each seat asynchronously, get price for reserved seat
+                        BigDecimal price = screeningService.reserveSeatGetPrice(seatRequest);
                         if (price != null) {
                             // Add ticket creation logic
                             tickets.add(ticketService.createTicket(new TicketRequest(seatRequest.screeningId(), seatRequest.seatNumber(), orderRequest.customerId(), price)));
@@ -110,22 +110,6 @@ public class OrderServiceV1 implements OrderService {
 
         // Wait for all asynchronous seat validation tasks to complete
         CompletableFuture.allOf(seatValidationFutures.toArray(new CompletableFuture[0])).join();
-    }
-
-    // Validate and reserve a seat
-    private ResponseEntity<BigDecimal> validateAndReserveSeat(SeatRequest seatRequest) {
-        ResponseEntity<BigDecimal> seatValidationResponse;
-        try {
-            seatValidationResponse = screeningClient.validateAndReserveSeat(seatRequest.screeningId(), seatRequest.seatNumber());
-        } catch (Exception e) {
-            throw new RuntimeException("An error occurred while trying to contact the screening-service", e);
-        }
-
-        if (seatValidationResponse.getStatusCode() != HttpStatus.OK || seatValidationResponse.getBody() == null) {
-            throw new IncompatibilityException("One of your required seats is either non-existent or not available");
-        }
-
-        return seatValidationResponse;
     }
 
     // Calculate the total amount for all the tickets in the list
@@ -199,19 +183,11 @@ public class OrderServiceV1 implements OrderService {
                 // Delete the ticket using its ID
                 ticketService.deleteTicket(ticket.getId());
                 // Release the reserved seat
-                releaseSeat(ticket);
+                screeningService.releaseSeat(ticket);
             } catch (Exception e) {
                 // Log error if ticket deletion or seat release fails
                 log.error("Failed to process failure for ticket with ID: {}", ticket.getId(), e);
             }
-        }
-    }
-
-    private void releaseSeat(Ticket ticket) {
-        try {
-            screeningClient.cancelSeatReservation(ticket.getScreeningId(), ticket.getSeatNumber());
-        } catch (Exception e) {
-            log.error("Failed to release seat {} for screening {}", ticket.getSeatNumber(), ticket.getScreeningId(), e);
         }
     }
 }

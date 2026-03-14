@@ -16,12 +16,13 @@ public interface ScreeningClient {
     ResponseEntity<Boolean> validateSeats(@PathVariable("screening-id") Integer screeningId,
                                              @PathVariable("seat-number") List<String> seatsNumbers);
 
+    //TODO: Fix double API definition and implement in Screening service
 
     // This method checks if the screening and the seat exist and are available.
     // If so, it marks the seat as unavailable and returns the price for the ticket.
     @GetMapping("/exists/{screening-id}/{seat-number}")
-    ResponseEntity<BigDecimal> validateAndReserveSeat(@PathVariable("screening-id") Integer screeningId,
-                                            @PathVariable("seat-number") String seatNumber);
+    ResponseEntity<BigDecimal> reserveSeatGetPrice(@PathVariable("screening-id") Integer screeningId,
+                                                   @PathVariable("seat-number") String seatNumber);
 
     // This method cancels the seat reservation
     @DeleteMapping("/cancel/{screening-id}/{seat-number}")
