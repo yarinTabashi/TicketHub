@@ -6,6 +6,7 @@ import com.yarin.customer.dtos.CustomerResponse;
 import com.yarin.customer.exceptions.CustomerNotFoundException;
 import com.yarin.customer.kafka.CustomerEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CustomerService {
     private final KafkaTemplate<String, CustomerEvent> kafkaTemplate;
     private final CustomerRepository repository;
@@ -21,6 +23,7 @@ public class CustomerService {
     public String createCustomer(CustomerRequest request) {
         Customer customer = this.repository.save(mapper.toCustomer(request));
         sendCustomerEvent(customer, CustomerEvent.CustomerEventType.REGISTERED);
+        log.info("Customer created: {}", customer);
         return customer.getId();
     }
 
@@ -32,6 +35,7 @@ public class CustomerService {
         updateCustomerData(customer, request);
         sendCustomerEvent(customer, CustomerEvent.CustomerEventType.UPDATED);
         this.repository.save(customer);
+        log.info("Customer updated: {}", customer);
     }
 
     private void updateCustomerData(Customer customer, CustomerRequest request) {
@@ -67,9 +71,11 @@ public class CustomerService {
                 ));
         this.repository.deleteById(id);
         sendCustomerEvent(customer, CustomerEvent.CustomerEventType.DELETED);
+        log.info("Customer deleted: {}", customer);
     }
 
     private void sendCustomerEvent(Customer customer, CustomerEvent.CustomerEventType eventType){
+        log.info("Sending customer event: {} for customer: {}", eventType,  customer.getId());
         CustomerEvent event = new CustomerEvent(
                 customer.getId(),
                 customer.getEmail(),

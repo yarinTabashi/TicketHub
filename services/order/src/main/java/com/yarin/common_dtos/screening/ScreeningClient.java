@@ -1,9 +1,7 @@
 package com.yarin.common_dtos.screening;
-
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -25,11 +23,11 @@ public interface ScreeningClient {
                                                    @PathVariable("seat-number") String seatNumber);
 
     // This method cancels the seat reservation
-    @DeleteMapping("/cancel/{screening-id}/{seat-number}")
     void cancelSeatReservation(@PathVariable("screening-id") Integer screeningId,
                                @PathVariable("seat-number") String seatNumber);
 
     ResponseEntity<BigDecimal> getOrderAmount(Integer screeningId, List<String> requiredSeats);
+    @DeleteMapping("/cancel/{screening-id}/{seat-number}")
 
     @PostMapping("/reserve/{screening-id}/{order-id}")
     ResponseEntity<Boolean> reserveSeats(
