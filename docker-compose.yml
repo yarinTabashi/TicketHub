@@ -88,6 +88,21 @@ services:
     depends_on:
       - kafka
 
+  config-service:
+    build: ./services/config-server
+    ports:
+      - "8888:8888"
+
+  discovery-service:
+    build: ./services/discovery
+    ports:
+      - "8761:8761"
+
+  customer-service:
+    build: ./services/customer
+    ports:
+      - "8090:8090"
+
 volumes:
   mongo:
   postgres:

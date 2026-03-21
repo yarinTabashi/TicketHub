@@ -3,7 +3,7 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/order
+    url: jdbc:postgresql://postgresql:5432/order
     username: postuser
     password: postpass
   jpa:
@@ -13,5 +13,5 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 application:
   config:
-    customer-url: http://localhost:8222/api/v1/customer
-    screening-url: http://localhost:8222/api/v1/screening
+    customer-url: http://customer-service:8222/api/v1/customer
+    screening-url: http://screening-service:8222/api/v1/screening

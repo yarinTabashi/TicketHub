@@ -3,13 +3,13 @@ spring:
     mongodb:
       username: rootuser
       password: rootpass
-      host: localhost
+      host: mongodb
       port: 27017
       database: customer
       authentication-database: admin
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer

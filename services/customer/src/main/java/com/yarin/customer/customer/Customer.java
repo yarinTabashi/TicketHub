@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @Getter
 @Setter
-@Document // TODO: Consider use on relation db instead of Mongo, because all the fields in this entity are required.
+@Document
 public class Customer {
     @Id
     private String id;

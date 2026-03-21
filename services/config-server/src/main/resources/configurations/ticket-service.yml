@@ -3,7 +3,7 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/ticket
+    url: jdbc:postgresql://postgresql:5432/ticket
     username: postuser
     password: postpass
   jpa:
