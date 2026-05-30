@@ -66,14 +66,15 @@ public class OrderServiceV2 implements OrderService {
         }
 
         // TODO: Step 6: Publish OrderCreated event (will be consumed by Notification-service
-        //  and by the Order-service: it should update the order status to succeed and set a serial num)
+        //  and async update the order status to succeed and set a serial num).
         createOrderCreatedEvent(customerId, order.getId(), order.getTotalAmount(), order.getOrderCode());
         return order.getId();
     }
 
     @Async
-    private void createOrderCreatedEvent(String customerId, Integer orderId, BigDecimal orderAmount, String orderCode) {
+    protected void createOrderCreatedEvent(String customerId, Integer orderId, BigDecimal orderAmount, String orderCode) {
         try{
+            // TODO: Change this and the customer APIs to return the customer object, instead of two separate requests
             CompletableFuture<String> customerFullName = customerClient.getCustomerFullName(customerId);
             CompletableFuture<String> customerEmail = customerClient.getCustomerEmail(customerId);
 
@@ -97,7 +98,7 @@ public class OrderServiceV2 implements OrderService {
     }
 
     @Async
-    private CompletableFuture<Boolean> verifyCustomer(String customerId) {
+    protected CompletableFuture<Boolean> verifyCustomer(String customerId) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         try {
             boolean isExist = customerClient.verifyCustomer(customerId);
@@ -109,7 +110,7 @@ public class OrderServiceV2 implements OrderService {
     }
 
     @Async
-    private CompletableFuture<Boolean> verifySeats(Integer screeningId, List<String> requiredSeats) {
+    protected CompletableFuture<Boolean> verifySeats(Integer screeningId, List<String> requiredSeats) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         try {
             ResponseEntity<Boolean> response = screeningClient.validateSeats(screeningId, requiredSeats);
@@ -121,7 +122,7 @@ public class OrderServiceV2 implements OrderService {
     }
 
     @Async
-    private CompletableFuture<BigDecimal> getOrderAmount(Integer screeningId, List<String> requiredSeats){
+    protected CompletableFuture<BigDecimal> getOrderAmount(Integer screeningId, List<String> requiredSeats){
         CompletableFuture<BigDecimal> future = new CompletableFuture<>();
         try {
             ResponseEntity<BigDecimal> response = screeningClient.getOrderAmount(screeningId, requiredSeats);
