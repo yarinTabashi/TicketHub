@@ -25,7 +25,8 @@ public class Screening {
     private Long version;  // used for handle optimistic locking
     private Integer movieId;
     private LocalDateTime showtime;
-    private boolean[][] seatsAvailabilityMap;
+    @Lob
+    private String seatsAvailabilityMap; // 0-Available, 1-Booked, 2- Unavailable seat
     private Integer availableSeats; // cached for improve performance to avoid recalculating it from the map.
     private BigDecimal ticketPrice;
 }

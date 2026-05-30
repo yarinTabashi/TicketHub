@@ -25,4 +25,8 @@ public class MovieService {
         Movie savedMovie = repository.save(movie);
         return mapper.fromMovie(savedMovie);
     }
+
+    public boolean isMovieExist(Integer movieId) {
+        return repository.existsById(movieId);
+    }
 }

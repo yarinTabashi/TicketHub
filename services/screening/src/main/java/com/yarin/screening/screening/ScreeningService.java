@@ -53,19 +53,14 @@ public class ScreeningService {
         screeningRepository.deleteById(id);
     }
 
-    // Get screenings by movieId
     public List<ScreeningResponse> getScreeningsByMovieId(Integer movieId) {
-        return screeningRepository.findByMovieId(movieId)
-                .stream()
-                .map(this.screeningMapper::fromScreening)  // Map each Screening to a ScreeningResponse
-                .collect(Collectors.toList());
+        // Fetch screenings from the database
+        List<ScreeningResponse> screenings = screeningRepository.findByMovieId(movieId);
+        return this.screeningRepository.findByMovieId(movieId);
     }
 
-    public int getRemainingTickets(Integer screeningId) {
-        Screening screening = screeningRepository.findById(screeningId)
-                .orElseThrow(() -> new RuntimeException("Screening not found"));
-
-        return screening.getAvailableSeats();
+    private int getAvailableSeatsByMovieId(Integer movieId){
+        return this.screeningRepository.findAvailableSeatsByMovieId(movieId);
     }
 
     /**
@@ -83,7 +78,7 @@ public class ScreeningService {
      *         - {@code 200 OK} with the price of the ticket if the seat is successfully reserved.
      */
     @Async
-    public CompletableFuture<ResponseEntity<BigDecimal>> validateAndReserveSeat(Integer screeningId, String seatNumber) {
+    public CompletableFuture<ResponseEntity<BigDecimal>> validateAndReserveSeat(Integer screeningId, String seatNumber, int rowsDim, int columnsDim) {
         // Step 1: Fetch the screening from the repository
         Optional<Screening> optionalScreening = screeningRepository.findById(screeningId);
 
@@ -100,18 +95,20 @@ public class ScreeningService {
 
         // Step 3: Parse the seatNumber
         SeatPosition seatPosition = parseSeatNumber(seatNumber);
+        int seatIndex = getSeatIndex(seatPosition, rowsDim, columnsDim);
 
-        // Step 4: Access the seats availability map (boolean matrix)
-        boolean[][] seatsAvailability = screening.getSeatsAvailabilityMap();
+        // Step 4: Access the seats availability map
+        String seatsAvailabilityMap = screening.getSeatsAvailabilityMap();
 
         // Step 5: Check if the seat is valid and available
-        if (!isSeatAvailable(seatsAvailability, seatPosition)) {
+        if (!isSeatAvailable(seatsAvailabilityMap, seatIndex)) {
             return CompletableFuture.completedFuture(ResponseEntity.status(409).body(null)); // Seat already reserved or invalid seat number
         }
 
         // Step 6: Reserve the seat
-        seatsAvailability[seatPosition.row()][seatPosition.col()] = true;
-        screening.setSeatsAvailabilityMap(seatsAvailability);
+        StringBuilder sb = new StringBuilder(seatsAvailabilityMap);
+        sb.setCharAt(seatIndex, '1');
+        screening.setSeatsAvailabilityMap(sb.toString());
 
         try {
             // Step 7: Save the updated screening with the reserved seat
@@ -125,6 +122,7 @@ public class ScreeningService {
         return CompletableFuture.completedFuture(ResponseEntity.ok(ticketPrice)); // Successfully reserved
     }
 
+
     /**
      * Parse the seatNumber to determine the row (i) and column (j)
      * For example, "A10" is a seat number where A is the row, and 10 is the column
@@ -136,12 +134,18 @@ public class ScreeningService {
         return new SeatPosition(row, col);
     }
 
-    private boolean isSeatAvailable(boolean[][] seatsAvailability, SeatPosition seatPosition) {
-        if (seatPosition.row() >= seatsAvailability.length || seatPosition.col() >= seatsAvailability[seatPosition.row()].length) {
-            return false; // Invalid seat number
-        }
-        return !seatsAvailability[seatPosition.row()][seatPosition.col()]; // Seat is available if false
+    private boolean isSeatAvailable(String seatsAvailability,int seatIndex) {
+        return seatsAvailability.charAt(seatIndex) == '0';
     }
+
+    private int getSeatIndex(SeatPosition seatPosition, int rowsDim, int columnsDim){
+        return seatPosition.row() * columnsDim + seatPosition.col();
+    }
+
+    private boolean isSeatExist(SeatPosition seatPosition, int rowsDim, int columnsDim) {
+        return seatPosition.row() >= 0 && seatPosition.row() < rowsDim && seatPosition.col() >= 0 && seatPosition.col() < columnsDim;
+    }
+
 
     /**
      * Cancels the reservation for a specific seat in a screening.
@@ -155,7 +159,7 @@ public class ScreeningService {
      *         - {@code 409 Conflict} if a concurrent modification occurs (optimistic locking failure).
      *         - {@code 204 No Content} if the reservation was successfully canceled.
      */
-    public ResponseEntity<Void> cancelSeatReservation(Integer screeningId, String seatNumber) {
+    public ResponseEntity<Void> cancelSeatReservation(Integer screeningId, String seatNumber, int rowsDim, int columnsDim) {
         // Step 1: Fetch the screening
         Optional<Screening> optionalScreening = screeningRepository.findById(screeningId);
         if (optionalScreening.isEmpty()) {
@@ -166,17 +170,20 @@ public class ScreeningService {
 
         // Step 2: Parse the seatNumber to determine the row (i) and column (j)
         SeatPosition seatPosition = parseSeatNumber(seatNumber);
+        int seatIndex = getSeatIndex(seatPosition, rowsDim, columnsDim);
 
         // Step 3: Access the seats availability map (boolean matrix)
-        boolean[][] seatsAvailability = screening.getSeatsAvailabilityMap();
+        String seatsAvailability = screening.getSeatsAvailabilityMap();
 
         // Step 4: Check if the seat is reserved
-        if (isSeatAvailable(seatsAvailability, seatPosition)) {
+        if (isSeatAvailable(seatsAvailability, seatIndex)) {
             return ResponseEntity.status(400).body(null); // Seat was not reserved, so it's invalid request
         }
 
         // Step 5 : if really reserved, mark it as available
-        seatsAvailability[seatPosition.row()][seatPosition.col()] = false;
+        StringBuilder sb = new StringBuilder(seatsAvailability);
+        sb.setCharAt(seatIndex, '0');
+        screening.setSeatsAvailabilityMap(sb.toString());
 
         try {
             screening.setSeatsAvailabilityMap(seatsAvailability);

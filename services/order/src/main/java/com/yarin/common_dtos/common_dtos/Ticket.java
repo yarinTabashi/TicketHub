@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ticket_seq")
-    @SequenceGenerator(name = "ticket_seq", sequenceName = "ticket_seq", allocationSize = 1)
+    @SequenceGenerator(name = "ticket_seq", sequenceName = "ticket_seq")
     private Integer id;
 
     @Column(name = "screening_id")
@@ -23,7 +23,4 @@ public class Ticket {
 
     @Column(name = "seat_number")
     private String seatNumber;
-
-    @Column(name = "ticket_price")
-    private BigDecimal ticketPrice;
 }

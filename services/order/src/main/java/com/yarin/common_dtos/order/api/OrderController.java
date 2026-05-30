@@ -1,6 +1,9 @@
-package com.yarin.common_dtos.order;
+package com.yarin.common_dtos.order.api;
 
+import com.yarin.common_dtos.order.OrderService;
+import com.yarin.common_dtos.order.OrderServiceV1;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

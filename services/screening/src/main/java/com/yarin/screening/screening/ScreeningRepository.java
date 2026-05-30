@@ -1,11 +1,16 @@
 package com.yarin.screening.screening;
 
+import com.yarin.screening.dtos.ScreeningResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 
 public interface ScreeningRepository extends JpaRepository<Screening, Integer> {
-    List<Screening> findByMovieId(Integer movieId);
+    // Return ScreeningResponse and not screening, so that it's not fetch the avaliabilty map, to do it easier method
+    List<ScreeningResponse> findByMovieId(Integer movieId);
+    @Query("SELECT s.availableSeats FROM Screening s WHERE s.movieId = :movieId")
+    Integer findAvailableSeatsByMovieId(@Param("movieId") Integer movieId);
 }
-

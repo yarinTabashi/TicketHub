@@ -3,7 +3,7 @@ server:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/screening
+    url: jdbc:postgresql://postgresql:5432/screening
     username: postuser
     password: postpass
   jpa:
@@ -21,4 +21,4 @@ spring:
 
 application:
   config:
-    movie-url: http://localhost:8222/api/v1/movies
+    movie-url: http://movie-service:8222/api/v1/movies
